@@ -67,7 +67,7 @@ function generateActivity(e: SpotifyPlayer): Activity {
         },
         type: 2,
         application_id: UserStore.getCurrentUser().id, // works, just errors in dev console can change to a real app id to stop
-        buttons: [`Stream ${e.track.name.length < 20 ? e.track.name : e.track.name.slice(0, 20)+"..."}`]
+        buttons: [`Stream ${e.track.name.length < 21 ? e.track.name : e.track.name.slice(0, 20)+"..."}`]
     };
 
     return as_activ;

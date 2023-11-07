@@ -31,7 +31,7 @@ export default definePlugin({
     },
     stop() {
         FluxDispatcher.unsubscribe("SPOTIFY_PLAYER_STATE", setActivity);
-    },
+    },  
 });
 
 function setActivity(activity: any = null) {

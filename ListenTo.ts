@@ -18,7 +18,6 @@ export default definePlugin({
         logger = new Logger(this.name);
 
         FluxDispatcher.subscribe("SPOTIFY_PLAYER_STATE", function(e: SpotifyPlayer) {
-            logger.info(e);
             if (e.track === null) return;
             if (e.isPlaying === false) return setActivity();
             try {

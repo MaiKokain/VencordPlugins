@@ -4,20 +4,40 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import { definePluginSettings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import { Logger } from "@utils/Logger";
-import definePlugin from "@utils/types";
+import definePlugin, { OptionType } from "@utils/types";
 import { FluxDispatcher, UserStore } from "@webpack/common";
 let logger!: Logger;
+
+const settings = definePluginSettings({
+    useURI: {
+        placeholder: "Use URI",
+        description: "Use spotify:// instead of https://open.spotify.com for \"Stream on Spotify\" button. **Note**\n This does not change instantly, you need to update state by either pausing and unpausing or do an action that updates the SPOTIFY_PLAYER_STATE",
+        type: OptionType.BOOLEAN,
+        default: false,
+        restartNeeded: false,
+    },
+    IsDebug: {
+        description: "Enable debug nothing special",
+        type: OptionType.BOOLEAN,
+        default: false,
+        restartNeeded: false
+    }
+});
 
 export default definePlugin({
     name: "ListenTo",
     description: "Display activity 'Listening to {ARTIST}' (only first artist is used, if have multiple)",
     authors: [Devs.MaiKokain],
+    settings,
     start() {
         logger = new Logger(this.name);
 
         FluxDispatcher.subscribe("SPOTIFY_PLAYER_STATE", function(e: SpotifyPlayer) {
+            if (settings.store.IsDebug) logger.info(e);
+
             if (e.track === null) return;
             if (e.isPlaying === false) return setActivity();
             try {
@@ -78,7 +98,7 @@ function generateActivity(e: SpotifyPlayer): Activity {
         metadata: {
             album_id: e.track.album.id,
             artist_ids: artists.artists_ids,
-            button_urls: [`http://open.spotify.com/track/${e.track.id}`],
+            button_urls: [settings.store.useURI ? `spotify://track/${e.track.id}` : `http://open.spotify.com/track/${e.track.id}`],
             context_uri: null
         },
         type: 2,

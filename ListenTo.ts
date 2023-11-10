@@ -18,6 +18,7 @@ export default definePlugin({
         logger = new Logger(this.name);
 
         FluxDispatcher.subscribe("SPOTIFY_PLAYER_STATE", function(e: SpotifyPlayer) {
+            logger.info(e);
             if (e.track === null) return;
             if (e.isPlaying === false) return setActivity();
             try {
@@ -42,8 +43,24 @@ function setActivity(activity: any = null) {
 }
 
 function generateActivity(e: SpotifyPlayer): Activity {
+    let as_activ: Activity = {};
+    if (e.track.isLocal === true) {
+        as_activ = {
+            flags: 48,
+            details: e.track.name,
+            name: e.track.name,
+            state: e.track.artists[0].id ? generateArtistsData(e.track.artists).artists_name : "Local File",
+            type: 2,
+            timestamps: {
+                end: e.position < 500 ? Date.now() + e.track.duration : Date.now() + e.track.duration - e.position
+            },
+            application_id: UserStore.getCurrentUser().id
+        };
+        return as_activ;
+    }
+
     const artists = generateArtistsData(e.track.artists);
-    const as_activ: Activity = {
+    as_activ = {
         flags: 48,
         assets: {
             large_image: `spotify:${e.track.album.image.url.split(/\/image\/(.*?)$/g)[1]}`,
@@ -67,7 +84,7 @@ function generateActivity(e: SpotifyPlayer): Activity {
         },
         type: 2,
         application_id: UserStore.getCurrentUser().id, // works, just errors in dev console can change to a real app id to stop
-        buttons: [`Stream ${e.track.name.length < 21 ? e.track.name : e.track.name.slice(0, 20)+"..."}`]
+        buttons: ["Stream on Spotify"]
     };
 
     return as_activ;

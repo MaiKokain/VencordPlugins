@@ -25,12 +25,6 @@ const settings = definePluginSettings({
         default: false,
         restartNeeded: false
     },
-    dispatchForAccountSwitch: {
-        description: "Auto setActivity on account switch",
-        type: OptionType.BOOLEAN,
-        default: true,
-        restartNeeded: false
-    }
 });
 
 export default definePlugin({
@@ -55,16 +49,9 @@ export default definePlugin({
             }
         });
         
-        if (settings.store.dispatchForAccountSwitch) {
-            FluxDispatcher.subscribe('CONNECTION_OPEN', () => {
-                if (!fallbackData) return logger.error("No fallback data to dispatch SPOTIFY_PLAYER_STATE for account switch")
-                FluxDispatcher.dispatch(fallbackData);
-            })
-        }
     },
     stop() {
         FluxDispatcher.unsubscribe("SPOTIFY_PLAYER_STATE", setActivity);
-        FluxDispatcher.unsubscribe("CONNECTION_OPEN", setActivity)
     },
 });
 
